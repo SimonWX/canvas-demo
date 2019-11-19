@@ -1,4 +1,23 @@
-# demo-canvas
+# Canvas-Demo
+## This is a canvas demo for work sence. 
+### Feature
+* Free Draw
+* Shape Draw
+  * Circle
+  * Rectangle
+  * Ellipse
+  * Straight Line
+  * Triangle
+* Line Color
+* Line Width
+* Drag
+* Clean Up Canvas
+* All Select
+* Cancel All Select
+* All Objects(in Canvas) to JSON
+* Delete Single Object (Include Free Line | Shape)
+* Delect All Objects (in Canvas, Include Free Line & Shapes)
+
 
 ## Project setup
 ```
