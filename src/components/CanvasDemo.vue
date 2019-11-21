@@ -868,7 +868,7 @@ export default {
     };
     var arithmeticArr = SplitArray(3, this.lineArr);
     // console.log("arithmeticArr:", arithmeticArr);
-    // 对进行分割过的数组进行首尾点捏取
+    // 对进行分割过的数组进行首尾点捏取, 后续会继续优化取点算法
     var vacuate = function(arr) {
       var vacuateArr = [];
       for (var i = 0; i < arr.length; i++) {
