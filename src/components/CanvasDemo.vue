@@ -855,6 +855,7 @@ export default {
       top: 10
     });
     canvas.add(path);
+    console.log('lineArr:', this.lineArr)
 
     // 按抽稀程度（等差数列）进行数组分割-- by myself
     var SplitArray = function(N, Q) {
@@ -882,7 +883,7 @@ export default {
       return vacuateArr;
     };
     var rarefyingArr = vacuate(arithmeticArr);
-    console.log("rarefyingArr:", JSON.stringify(rarefyingArr));
+    console.log("rarefyingArr:", rarefyingArr);
 
     var path2 = new fabric.Path(rarefyingArr);
     path2.set({
@@ -967,10 +968,10 @@ export default {
       if (!coordinate || !(coordinate.length > 2)) {
         return null;
       }else{
-        console.log('coordinate:',coordinate)
-        console.log(typeof coordinate)
+        // console.log('coordinate:',coordinate)
+        // console.log(typeof coordinate)
         coordinate.forEach((item, index) => {
-          // item['id'] = `${index}_xu`;
+          item['id'] = index;
         });
       }
       let result = compressLine(coordinate, [], 0, coordinate.length - 1, dMax);
@@ -988,7 +989,8 @@ export default {
       return resultLatLng;
     };
 
-    var path3 = new fabric.Path(douglasPeucker(this.lineArr));
+    var path3 = new fabric.Path(douglasPeucker(this.lineArr,60000));
+    console.log('douglasPeucker:',douglasPeucker(this.lineArr,60000))
     path3.set({
       fill: "transparent",
       stroke: "red",
