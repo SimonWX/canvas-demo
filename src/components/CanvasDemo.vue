@@ -787,6 +787,19 @@ export default {
         ["Q", 936.5, 92.5625, 933.5, 95.5625],
         ["Q", 930.5, 98.5625, 928.5, 100.0625],
         ["L", 926.499, 101.5635]
+      ],
+      lineArr2: [
+        [48.5, 163.5635],
+        [48.5, 163.5625],
+        [48.5, 162.5625],
+        [48.5, 160.5625],
+        [51.5, 157.5625],
+        [52.5, 154.5625],
+        [56.5, 150.5625],
+        [59.5, 146.5625],
+        [63.5, 141.5625],
+        [67.5, 137.5625],
+        [72.5, 133.5625]
       ]
     };
   },
@@ -832,23 +845,18 @@ export default {
     }
     var lineArrdelayer = reduceDimension(this.lineArr).join(" ");
     console.log(lineArrdelayer);
-    // 原来的path
+    // 原始的path
     var path = new fabric.Path(lineArrdelayer);
     path.set({
       fill: "transparent",
       stroke: "green",
       opacity: 1,
       left: 100,
-      top: 100
+      top: 10
     });
     canvas.add(path);
 
-    // function arithmeticProgression(arr, interval) {
-    //   var arrlen = this.lineArr.length;
-
-    // }
-
-    // 按抽稀程度（等差数列）进行数组分割
+    // 按抽稀程度（等差数列）进行数组分割-- by myself
     var SplitArray = function(N, Q) {
       var R = [],
         F;
@@ -858,7 +866,7 @@ export default {
       return R;
     };
     var arithmeticArr = SplitArray(3, this.lineArr);
-    console.log("arithmeticArr:", arithmeticArr);
+    // console.log("arithmeticArr:", arithmeticArr);
     // 对进行分割过的数组进行首尾点捏取
     var vacuate = function(arr) {
       var vacuateArr = [];
@@ -870,11 +878,11 @@ export default {
         // }
         vacuateArr.push(arr[i][itemLen - 1]);
       }
-      console.log("vacuateArr------", vacuateArr);
+      // console.log("vacuateArr------", vacuateArr);
       return vacuateArr;
     };
     var rarefyingArr = vacuate(arithmeticArr);
-    console.log("rarefyingArr:", rarefyingArr);
+    console.log("rarefyingArr:", JSON.stringify(rarefyingArr));
 
     var path2 = new fabric.Path(rarefyingArr);
     path2.set({
@@ -882,9 +890,113 @@ export default {
       stroke: "blue",
       opacity: 1,
       left: 100,
-      top: 400
+      top: 250
     });
     canvas.add(path2);
+
+    // Douglas-Peuker-Algorithm
+    // 计算两点之间的距离
+    var calculationDistance = (point1, point2) => {
+      // console.log('point1:',point1)
+      // console.log('point2:',point2)
+      let lat1 = point1[point1.length-1];
+      let lat2 = point2[point2.length-1];
+      let lng1 = point1[1];
+      let lng2 = point2[1];
+      let radLat1 = (lat1 * Math.PI) / 180.0;
+      let radLat2 = (lat2 * Math.PI) / 180.0;
+      let a = radLat1 - radLat2;
+      let b = (lng1 * Math.PI) / 180.0 - (lng2 * Math.PI) / 180.0;
+      let s =
+        2 *
+        Math.asin(
+          Math.sqrt(
+            Math.pow(Math.sin(a / 2), 2) +
+              Math.cos(radLat1) *
+                Math.cos(radLat2) *
+                Math.pow(Math.sin(b / 2), 2)
+          )
+        );
+      return s * 6370996.81;
+    };
+
+    // 计算点pX到点pA和pB所确定的直线的距离
+    var distToSegment = (start, end, center) => {
+      let a = Math.abs(calculationDistance(start, end));
+      let b = Math.abs(calculationDistance(start, center));
+      let c = Math.abs(calculationDistance(end, center));
+      let p = (a + b + c) / 2.0;
+      let s = Math.sqrt(Math.abs(p * (p - a) * (p - b) * (p - c)));
+      return (s * 2.0) / a;
+    };
+
+    // 递归方式压缩轨迹
+    var compressLine = (coordinate, result, start, end, dMax) => {
+      if (start < end) {
+        let maxDist = 0;
+        let currentIndex = 0;
+        let startPoint = coordinate[start];
+        let endPoint = coordinate[end];
+        for (let i = start + 1; i < end; i++) {
+          let currentDist = distToSegment(startPoint, endPoint, coordinate[i]);
+          if (currentDist > maxDist) {
+            maxDist = currentDist;
+            currentIndex = i;
+          }
+        }
+        if (maxDist >= dMax) {
+          //将当前点加入到过滤数组中
+          result.push(coordinate[currentIndex]);
+          //将原来的线段以当前点为中心拆成两段，分别进行递归处理
+          compressLine(coordinate, result, start, currentIndex, dMax);
+          compressLine(coordinate, result, currentIndex, end, dMax);
+        }
+      }
+      return result;
+    };
+
+    // 供调用的抽稀入口函数
+    /**
+     *
+     *@param coordinate 原始轨迹Array<{latitude,longitude}>
+     *@param dMax 允许最大距离误差
+     *@return douglasResult 抽稀后的轨迹
+     *
+     */
+    var douglasPeucker = (coordinate, dMax = 10) => {
+      if (!coordinate || !(coordinate.length > 2)) {
+        return null;
+      }else{
+        console.log('coordinate:',coordinate)
+        console.log(typeof coordinate)
+        coordinate.forEach((item, index) => {
+          // item['id'] = `${index}_xu`;
+        });
+      }
+      let result = compressLine(coordinate, [], 0, coordinate.length - 1, dMax);
+      result.push(coordinate[0]);
+      result.push(coordinate[coordinate.length - 1]);
+      let resultLatLng = result.sort((a, b) => {
+        if (a.id < b.id) {
+          return -1;
+        } else if (a.id > b.id) return 1;
+        return 0;
+      });
+      resultLatLng.forEach(item => {
+        item.id = undefined;
+      });
+      return resultLatLng;
+    };
+
+    var path3 = new fabric.Path(douglasPeucker(this.lineArr));
+    path3.set({
+      fill: "transparent",
+      stroke: "red",
+      opacity: 1,
+      left: 100,
+      top: 510
+    });
+    canvas.add(path3);
 
     // 全选
     document.getElementById("selectAll").onclick = () => {

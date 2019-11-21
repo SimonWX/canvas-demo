@@ -18,6 +18,7 @@
 * Delete Single Object (Include Free Line | Shape)
 * Delect All Objects (in Canvas, Include Free Line & Shapes)
 * Arithmetic Progression Diluting Algorithm for Free Draw Path
+* Douglas Peucker Diluting Algorithm for Free Draw Path
 
 
 ## Project setup
