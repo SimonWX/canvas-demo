@@ -2,7 +2,7 @@
  * @Author: xuhao 
  * @Date: 2019-12-30 15:01:14 
  * @Last Modified by: xuhao
- * @Last Modified time: 2019-12-30 16:27:06
+ * @Last Modified time: 2021-03-19 11:43:29
  */
 
 /*
@@ -85,12 +85,19 @@ const calculationDistance = (point1, point2) => {
   return s * 6370996.81;
 };
 
-// 计算点pX到点pA和pB所确定的直线的距离
+/*
+*  计算点pX到点pA和pB所确定的直线的距离
+*  点到直线的最短距离实际上就是点到线的垂直距离
+*/
 const distToSegment = (start, end, center) => {
+  // 三角形的三个边长
   let a = Math.abs(calculationDistance(start, end));
   let b = Math.abs(calculationDistance(start, center));
   let c = Math.abs(calculationDistance(end, center));
+  // 利用海伦公式计算三角形面积
+  // 周长的一半
   let p = (a + b + c) / 2.0;
+  //普通公式计算三角形面积反推点到线的垂直距离
   let s = Math.sqrt(Math.abs(p * (p - a) * (p - b) * (p - c)));
   return (s * 2.0) / a;
 };

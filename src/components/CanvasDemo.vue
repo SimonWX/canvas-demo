@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h3>Fabric.js-Demo</h3>
+    <h4>Canvas-Demo</h4>
     <div class="operation-bar">
       <button id="freeDraw" class="btn">画笔模式</button>
       <label class="btn">
@@ -14,7 +14,7 @@
           step="1"
           placeholder="请选择画笔宽度"
         />
-        {{lineWidth}}
+        {{ lineWidth }}
       </label>
       <label class="btn lineColor">
         线色：
@@ -23,7 +23,13 @@
       <button id="clearCanvas" class="btn">清除画板</button>
       <button id="selectAll" class="btn">全选</button>
       <button id="discardSelectAll" class="btn">取消全选</button>
-      <button id="deleteSelect" :class="['btn',!isDraw ? 'isDis':'']" :disabled="!isDraw">删除</button>
+      <button
+        id="deleteSelect"
+        :class="['btn', !isDraw ? 'isDis' : '']"
+        :disabled="!isDraw"
+      >
+        删除
+      </button>
       <button id="toJSON" class="btn">画板信息序列转化为JSON</button>
       <label class="btn">
         图形：
@@ -36,6 +42,19 @@
           <option value="triangle">三角形</option>
         </select>
       </label>
+      <label class="btn">
+        抽稀程度：
+        <input
+          type="range"
+          id="thinningLevel"
+          autocomplete="false"
+          min="3"
+          max="8"
+          step="1"
+          placeholder="请选择抽稀程度"
+        />
+        {{ thinningLevel }}
+      </label>
     </div>
 
     <div class="canvasWrapper">
@@ -46,14 +65,16 @@
 
 <script>
 import { fabric } from "fabric";
-import core from './js/core.js'
+import core from "./js/core.js";
 export default {
   name: "HelloWorld",
   props: {
-    msg: String
+    msg: String,
   },
   data() {
     return {
+      thinningLevel: 3,
+      dMax: 63000,
       lineWidth: 2,
       isDraw: true,
       rectCount: 0,
@@ -787,7 +808,7 @@ export default {
         ["Q", 940.5, 87.5625, 938.5, 90.0625],
         ["Q", 936.5, 92.5625, 933.5, 95.5625],
         ["Q", 930.5, 98.5625, 928.5, 100.0625],
-        ["L", 926.499, 101.5635]
+        ["L", 926.499, 101.5635],
       ],
       lineArr2: [
         [48.5, 163.5635],
@@ -800,16 +821,17 @@ export default {
         [59.5, 146.5625],
         [63.5, 141.5625],
         [67.5, 137.5625],
-        [72.5, 133.5625]
-      ]
+        [72.5, 133.5625],
+      ],
+      canvasObj: null
     };
   },
   mounted() {
     document.getElementById("lineWidthRange").value = "2";
-    var canvas = new fabric.Canvas("main");
+    this.canvasObj = new fabric.Canvas("main");
     fabric.Object.prototype.transparentCorners = false;
-    canvas.setWidth(1200);
-    canvas.setHeight(800);
+    this.canvasObj.setWidth(1200);
+    this.canvasObj.setHeight(800);
     // var rect = new fabric.Rect({
     //   left: 100, //距离画布左侧的距离，单位是像素
     //   top: 100, //距离画布上边的距离
@@ -817,7 +839,7 @@ export default {
     //   width: 100, //方形的宽度
     //   height: 100 //方形的高度
     // });
-    // canvas.add(rect);
+    // this.canvasObj.add(rect);
 
     // var rect2 = new fabric.Rect({
     //   left: 310, //距离画布左侧的距离，单位是像素
@@ -826,22 +848,30 @@ export default {
     //   width: 100, //方形的宽度
     //   height: 100 //方形的高度
     // });
-    // canvas.add(rect2);
+    // this.canvasObj.add(rect2);
 
     // Hovering
     // let tempColor;
-    // canvas.on('mouse:over', function(e) {
+    // this.canvasObj.on('mouse:over', function(e) {
     //   tempColor = e.target.fill;
     //   e.target.set('fill', 'lightblue');
-    //   canvas.renderAll();
+    //   this.canvasObj.renderAll();
     // });
-    // canvas.on('mouse:out', function(e) {
+    // this.canvasObj.on('mouse:out', function(e) {
     //   e.target.set('fill', tempColor);
-    //   canvas.renderAll();
+    //   this.canvasObj.renderAll();
     // });
 
     var lineArrdelayer = core.reduceDimension(this.lineArr).join(" ");
+    console.log("Q：二次贝赛尔曲线");
+    console.log("C：三次贝塞尔曲线");
+    console.log("M：Canvas中的moveTo");
+    console.log("L：Canvas中的lineTo");
+    console.log("H：表示水平方向移到某个x处");
+    console.log("V：表示垂直方向上移到某个y处");
+    console.log("Z：其表示闭合，用于将起点与终点连起来");
     console.log(lineArrdelayer);
+
     // 原始的path
     var path = new fabric.Path(lineArrdelayer);
     path.set({
@@ -849,13 +879,16 @@ export default {
       stroke: "green",
       opacity: 1,
       left: 100,
-      top: 10
+      top: 10,
     });
-    canvas.add(path);
-    console.log('lineArr:', this.lineArr)
+    this.canvasObj.add(path);
+    console.log("lineArr:", this.lineArr);
 
-    // 按抽稀程度（等差数列）进行数组分割-- by myself
-    var rarefyingArr = core.apDiluting(this.lineArr, 3)
+    document.getElementById("thinningLevel").value = 3;
+    this.thinningLevel = parseInt(
+      document.getElementById("thinningLevel").value
+    );
+    var rarefyingArr = core.apDiluting(this.lineArr, 3);
     console.log("rarefyingArr:", rarefyingArr);
     var path2 = new fabric.Path(rarefyingArr);
     path2.set({
@@ -863,47 +896,124 @@ export default {
       stroke: "blue",
       opacity: 1,
       left: 100,
-      top: 250
+      top: 250,
     });
-    canvas.add(path2);
-    
+    this.canvasObj.add(path2);
 
-    // Douglas-Peuker-Algorithm
-    var path3 = new fabric.Path(core.douglasPeucker(this.lineArr,60000));
-    console.log('douglasPeucker:',core.douglasPeucker(this.lineArr,60000))
+    var path3 = new fabric.Path(core.douglasPeucker(this.lineArr, this.dMax));
+    console.log(
+      "douglasPeucker:",
+      core.douglasPeucker(this.lineArr, this.dMax)
+    );
     path3.set({
       fill: "transparent",
       stroke: "red",
       opacity: 1,
       left: 100,
-      top: 510
+      top: 510,
     });
-    canvas.add(path3);
+    this.canvasObj.add(path3);
+
+    // 按抽稀程度（等差数列）进行数组分割-- by myself
+    document.getElementById("thinningLevel").onchange = (e) => {
+      for (let i = 0; i < this.canvasObj._objects.length; i++) {
+        if (this.canvasObj._objects[i].stroke == "blue") {
+          this.canvasObj.remove(this.canvasObj._objects[i]);
+        }
+      }
+      this.thinningLevel = parseInt(e.target.value);
+      var rarefyingArr = core.apDiluting(this.lineArr, this.thinningLevel);
+      console.log("lineArr:", this.lineArr);
+      console.log("thinningLevel", this.thinningLevel);
+      console.log("rarefyingArr:", rarefyingArr);
+      var path2 = new fabric.Path(rarefyingArr);
+      path2.path = rarefyingArr;
+      path2.set({
+        fill: "transparent",
+        stroke: "blue",
+        opacity: 1,
+        left: 100,
+        top: 250,
+      });
+      this.canvasObj.add(path2);
+
+      switch (this.thinningLevel) {
+        case 3:
+          this.dMax = 63000;
+          break;
+        case 4:
+          this.dMax = 135000;
+          break;
+        case 5:
+          this.dMax = 217000;
+          break;
+        case 6:
+          this.dMax = 310000;
+          break;
+        case 7:
+          this.dMax = 430000;
+          break;
+        case 8:
+          this.dMax = 536000;
+          break;
+        default:
+          this.dMax = 63000;
+      }
+
+      // Douglas-Peuker-Algorithm
+      /*
+      两种抽稀算法抽稀程度挂钩：
+      等差： 8   道格拉斯： 536000
+      等差： 7   道格拉斯： 430000
+      等差： 6   道格拉斯： 310000
+      等差： 5   道格拉斯:  217000
+      等差： 4   道格拉斯： 135000
+      等差： 3   道格拉斯： 63000 
+    */
+      for (let i = 0; i < this.canvasObj._objects.length; i++) {
+        if (this.canvasObj._objects[i].stroke == "red") {
+          this.canvasObj.remove(this.canvasObj._objects[i]);
+        }
+      }
+      var path3 = new fabric.Path(core.douglasPeucker(this.lineArr, this.dMax));
+      console.log(
+        "douglasPeucker:",
+        core.douglasPeucker(this.lineArr, this.dMax)
+      );
+      path3.set({
+        fill: "transparent",
+        stroke: "red",
+        opacity: 1,
+        left: 100,
+        top: 510,
+      });
+      this.canvasObj.add(path3);
+    };
 
     // 全选
     document.getElementById("selectAll").onclick = () => {
-      canvas.discardActiveObject();
-      var sel = new fabric.ActiveSelection(canvas.getObjects(), {
-        canvas: canvas
+      this.canvasObj.discardActiveObject();
+      var sel = new fabric.ActiveSelection(this.canvasObj.getObjects(), {
+        canvas: this.canvasObj,
       });
-      canvas.setActiveObject(sel);
-      canvas.requestRenderAll();
+      this.canvasObj.setActiveObject(sel);
+      this.canvasObj.requestRenderAll();
     };
     // 取消全选
     document.getElementById("discardSelectAll").onclick = () => {
-      canvas.discardActiveObject();
-      canvas.requestRenderAll();
+      this.canvasObj.discardActiveObject();
+      this.canvasObj.requestRenderAll();
     };
 
     // 清除画板
     document.getElementById("clearCanvas").onclick = () => {
-      canvas.clear();
+      this.canvasObj.clear();
     };
 
     // 画笔
     document.getElementById("freeDraw").onclick = () => {
-      canvas.isDrawingMode = !canvas.isDrawingMode;
-      if (canvas.isDrawingMode) {
+      this.canvasObj.isDrawingMode = !this.canvasObj.isDrawingMode;
+      if (this.canvasObj.isDrawingMode) {
         document.getElementById("freeDraw").innerHTML = "取消画笔模式";
         this.isDraw = false;
       } else {
@@ -913,65 +1023,82 @@ export default {
     };
 
     // 线宽
-    document.getElementById("lineWidthRange").onchange = e => {
-      canvas.freeDrawingBrush.width =
+    document.getElementById("lineWidthRange").onchange = (e) => {
+      this.canvasObj.freeDrawingBrush.width =
         parseInt(document.getElementById("lineWidthRange").value, 10) || 1;
       this.lineWidth = document.getElementById("lineWidthRange").value;
       console.log(e);
     };
     // 线色
-    document.getElementById("lineColor").onchange = e => {
-      canvas.freeDrawingBrush.color = document.getElementById(
+    document.getElementById("lineColor").onchange = (e) => {
+      this.canvasObj.freeDrawingBrush.color = document.getElementById(
         "lineColor"
       ).value;
       console.log(e);
     };
 
+    console.log('oooooooooo',this.canvasObj)
     // 删除选中区域
-    var deleteSelectedObject = document.getElementById("deleteSelect");
-    deleteSelectedObject.onclick = function() {
-      // // 优化逻辑
-      // if (canvas.getActiveObjects()) {
-      //   console.log(canvas.getActiveObjects())
-      //   canvas.getActiveObjects().forEachObject(function(o) {
-      //     canvas.remove(o);
+    document.getElementById("deleteSelect").onclick =  (e) => {
+      // 优化逻辑
+      // if (this.canvasObj.getActiveObjects()) {
+      //   console.log(this.canvasObj.getActiveObjects())
+      //   this.canvasObj.getActiveObjects().forEachObject(function(o) {
+      //     this.canvasObj.remove(o);
       //   });
-      //   canvas.discardActiveObject().renderAll();
-      // }else if(canvas.getActiveObject()){
-      //   canvas.remove(canvas.getActiveObject());
+      //   this.canvasObj.discardActiveObject().renderAll();
+      // }else if(this.canvasObj.getActiveObject()){
+      //   this.canvasObj.remove(this.canvasObj.getActiveObject());
       // }
 
+      console.log('this.canvasObj',this.canvasObj)
+
+
       // 可以运行的逻辑
-      if (canvas.getActiveObject()) {
-        var flag = canvas.getActiveObject()._objects;
+      if (this.canvasObj && this.canvasObj.getActiveObject()) {
+        debugger
+        console.log('a')
+        var flag = this.canvasObj.getActiveObject()._objects;
+        console.log('flag',flag)
         if (flag) {
-          canvas.getActiveObject().forEachObject(function(o) {
-            canvas.remove(o);
+          this.canvasObj.getActiveObject().forEachObject(function (o) {
+            this.canvasObj.remove(this.canvasObj.getActiveObject());
           });
         } else {
-          canvas.remove(canvas.getActiveObject());
+          this.canvasObj.remove(this.canvasObj.getActiveObject());
         }
-        canvas.discardActiveObject().renderAll();
-      } else {
-        canvas.remove(canvas.getActiveObjects());
+        this.canvasObj.discardActiveObject().renderAll();
+      } else { // 没有被选择的对象
+        console.log('b')
+        this.canvasObj && this.canvasObj.remove(this.canvasObj.getActiveObjects());
       }
     };
 
     // 画板信息序列转化为JSON对象
     document.getElementById("toJSON").onclick = () => {
-      let JSONOBJECT = canvas.toJSON();
-      console.log(JSON.stringify(JSONOBJECT.objects[0].path));
+      let JSONOBJECT = this.canvasObj.toJSON();
+      console.log("JSONOBJECT", JSONOBJECT.objects);
+      for (var i = 0; i < JSONOBJECT.objects.length; i++) {
+        if (JSONOBJECT.objects[i].path) {
+          console.log(
+            "path的JSON序列：",
+            JSON.stringify(JSONOBJECT.objects[i].path)
+          );
+        } else {
+          console.log("规则图形的参数：", JSONOBJECT.objects[i]);
+        }
+      }
     };
 
     // 选择图形，填入画板
-    document.getElementById("selectShape").onchange = e => {
+    document.getElementById("selectShape").onchange = (e) => {
       console.log(e);
       let currentColor = document.getElementById("lineColor").value;
       let currentLineWidth = document.getElementById("lineWidthRange").value;
       this.color = currentColor;
       this.lineWidthCurrent = parseInt(currentLineWidth);
-      // var canWid = canvas.height,
-      //   canHei = canvas.width;
+      // var canWid = this.canvasObj.height,
+      //   canHei = this.canvasObj.width;
       // var randomLeft = 0;
       // var randomTop = 0;
       // randomLeft = Math.floor(Math.random() * (canWid + 1));
@@ -999,10 +1126,10 @@ export default {
             stroke: this.color,
             strokeWidth: this.lineWidthCurrent,
             width: 100, //方形的宽度
-            height: 100 //方形的高度,
+            height: 100, //方形的高度,
           });
-          canvas.add(rectObj);
-          canvas.setActiveObject(rectObj);
+          this.canvasObj.add(rectObj);
+          this.canvasObj.setActiveObject(rectObj);
           break;
         case "circle":
           this.circleCount++;
@@ -1013,10 +1140,10 @@ export default {
             stroke: this.color,
             strokeWidth: this.lineWidthCurrent,
             originX: 0,
-            originY: 0
+            originY: 0,
           });
-          canvas.add(circleObj);
-          canvas.setActiveObject(circleObj);
+          this.canvasObj.add(circleObj);
+          this.canvasObj.setActiveObject(circleObj);
           break;
         case "ellipse":
           this.ellipseCount++;
@@ -1029,9 +1156,9 @@ export default {
             strokeWidth: this.lineWidthCurrent,
             angle: 0,
             left: 100,
-            top: 100
+            top: 100,
           });
-          canvas.add(ellipseObj);
+          this.canvasObj.add(ellipseObj);
           break;
         case "straight":
           this.lineCount++;
@@ -1041,10 +1168,10 @@ export default {
             top: this.rectCount * 100 + 200, //距离画布上边的距离
             fill: "",
             stroke: this.color, //笔触颜色
-            strokeWidth: this.lineWidthCurrent
+            strokeWidth: this.lineWidthCurrent,
           });
-          canvas.add(lineObj);
-          canvas.setActiveObject(lineObj);
+          this.canvasObj.add(lineObj);
+          this.canvasObj.setActiveObject(lineObj);
           break;
         case "triangle":
           this.triangleCount++;
@@ -1056,10 +1183,10 @@ export default {
             stroke: this.color,
             strokeWidth: this.lineWidthCurrent,
             left: 50,
-            top: 50
+            top: 50,
           });
-          canvas.add(triangleObj);
-          canvas.setActiveObject(triangleObj);
+          this.canvasObj.add(triangleObj);
+          this.canvasObj.setActiveObject(triangleObj);
           break;
         default:
           console.log("请选择图案");
@@ -1068,7 +1195,9 @@ export default {
       document.getElementById("selectShape").value = null;
     };
   },
-  methods: {}
+  methods: {
+    drawFree() {},
+  },
 };
 </script>
 
@@ -1110,7 +1239,7 @@ label {
 label input[type="range"] {
   vertical-align: middle;
   margin-bottom: 8px;
-  width: 100px;
+  width: 80px;
   -webkit-appearance: none;
   background: transparent;
 }
