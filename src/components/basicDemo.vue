@@ -58,7 +58,7 @@
     </div> -->
 
     <div class="canvasWrapper">
-      <canvas id="canvas" width="1200" height="800"></canvas>
+      <canvas id="canvas" width="1200" height="900"></canvas>
     </div>
   </div>
 </template>
@@ -77,18 +77,13 @@ export default {
   mounted() {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
-
-    // 绘制一个矩形
-    // ctx.fillStyle = 'green';
-    // ctx.fillRect(10, 10, 150, 100);
-
+    ctx.fillStyle = "#24b95f";
     // 绘制矩形
     ctx.fillRect(25, 25, 100, 100);
     // 清除矩形中间的部分矩形范围
     ctx.clearRect(45, 45, 60, 60);
     // 绘制矩形边框
     ctx.strokeRect(50, 50, 50, 50);
-
 
     // 绘制笑脸
     ctx.beginPath();
@@ -118,37 +113,208 @@ export default {
 
     // 二次贝塞尔曲线
     ctx.beginPath();
-    ctx.moveTo(875, 25);
-    ctx.quadraticCurveTo(825, 25, 825, 62.5);
-    ctx.quadraticCurveTo(825, 100, 850, 100);
-    ctx.quadraticCurveTo(850, 120, 830, 125);
-    ctx.quadraticCurveTo(860, 120, 865, 100);
-    ctx.quadraticCurveTo(925, 100, 925, 62.5);
-    ctx.quadraticCurveTo(925, 25, 875, 25);
+    ctx.moveTo(975, 25);
+    ctx.quadraticCurveTo(925, 25, 925, 62.5);
+    ctx.quadraticCurveTo(925, 100, 950, 100);
+    ctx.quadraticCurveTo(950, 120, 930, 125);
+    ctx.quadraticCurveTo(960, 120, 965, 100);
+    ctx.quadraticCurveTo(1025, 100, 1025, 62.5);
+    ctx.quadraticCurveTo(1025, 25, 975, 25);
     ctx.stroke();
 
-     //三次贝塞尔曲线
+    //三次贝塞尔曲线
     ctx.beginPath();
-    ctx.moveTo(75, 440);
-    ctx.bezierCurveTo(75, 437, 70, 425, 50, 425);
-    ctx.bezierCurveTo(20, 425, 20, 462.5, 20, 462.5);
-    ctx.bezierCurveTo(20, 480, 40, 502, 75, 520);
-    ctx.bezierCurveTo(110, 502, 130, 480, 130, 462.5);
-    ctx.bezierCurveTo(130, 462.5, 130, 425, 100, 425);
-    ctx.bezierCurveTo(85, 425, 75, 437, 75, 440);
+    ctx.moveTo(75, 340);
+    ctx.bezierCurveTo(75, 337, 70, 325, 50, 325);
+    ctx.bezierCurveTo(20, 325, 20, 362.5, 20, 362.5);
+    ctx.bezierCurveTo(20, 380, 40, 402, 75, 420);
+    ctx.bezierCurveTo(110, 402, 130, 380, 130, 362.5);
+    ctx.bezierCurveTo(130, 362.5, 130, 325, 100, 325);
+    ctx.bezierCurveTo(85, 325, 75, 337, 75, 340);
     ctx.fill();
 
     // 绘制文本
-    ctx.font = "48px serif";
-    ctx.fillText("Hello world", 350, 480);
+    ctx.font = "30px serif";
+    ctx.fillText("Hello world", 320, 380);
 
     // 绘制文本边框
+    ctx.font = "30px serif";
+    ctx.strokeText("Hello everyone", 600, 380);
 
-    ctx.font = "48px serif";
-  ctx.strokeText("Hello everyone", 700, 480);
+    // 绘制图片
+    var img = new Image();
+    img.onload = function () {
+      ctx.drawImage(img, 900, 300);
+      ctx.beginPath();
+      ctx.moveTo(930, 396);
+      ctx.lineTo(970, 366);
+      ctx.lineTo(1003, 376);
+      ctx.lineTo(1070, 315);
+      ctx.stroke();
+    };
+    img.src = "https://mdn.mozillademos.org/files/5395/backdrop.png";
 
+    // 循环全景图
+    this.loopPanorama();
+
+    // this.animation();
   },
-  methods: {},
+  methods: {
+    loopPanorama() {
+      var img = new Image();
+      // User Variables - customize these to change the image being scrolled, its
+      // direction, and the speed.
+
+      img.src =
+        "https://mdn.mozillademos.org/files/4553/Capitan_Meadows,_Yosemite_National_Park.jpg";
+      var CanvasXSize = 1200;
+      var CanvasYSize = 200;
+      var speed = 30; // lower is faster
+      var scale = 1.05;
+      var y = 590; // vertical offset
+
+      // Main program
+
+      var dx = 0.75;
+      var imgW;
+      var imgH;
+      var x = 0;
+      var clearX;
+      var clearY;
+      var ctx;
+
+      img.onload = function () {
+        imgW = img.width * scale;
+        imgH = img.height * scale;
+
+        if (imgW > CanvasXSize) {
+          // image larger than canvas
+          x = CanvasXSize - imgW;
+        }
+        if (imgW > CanvasXSize) {
+          // image width larger than canvas
+          clearX = imgW;
+        } else {
+          clearX = CanvasXSize;
+        }
+        if (imgH > CanvasYSize) {
+          // image height larger than canvas
+          clearY = imgH;
+        } else {
+          clearY = CanvasYSize;
+        }
+
+        // get canvas context
+        ctx = document.getElementById("canvas").getContext("2d");
+
+        // set refresh rate
+        return setInterval(draw, speed);
+      };
+
+      function draw() {
+        ctx.clearRect(0, y, clearX, clearY); // clear the canvas
+
+        // if image is <= Canvas Size
+        if (imgW <= CanvasXSize) {
+          // reset, start from beginning
+          if (x > CanvasXSize) {
+            x = -imgW + x;
+          }
+          // draw additional image1
+          if (x > 0) {
+            ctx.drawImage(img, -imgW + x, y, imgW, imgH);
+          }
+          // draw additional image2
+          if (x - imgW > 0) {
+            ctx.drawImage(img, -imgW * 2 + x, y, imgW, imgH);
+          }
+        }
+
+        // image is > Canvas Size
+        else {
+          // reset, start from beginning
+          if (x > CanvasXSize) {
+            x = CanvasXSize - imgW;
+          }
+          // draw aditional image
+          if (x > CanvasXSize - imgW) {
+            ctx.drawImage(img, x - imgW + 1, y, imgW, imgH);
+          }
+        }
+        // draw image
+        ctx.drawImage(img, x, y, imgW, imgH);
+        // amount to move
+        x += dx;
+      }
+    },
+
+    animation() {
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+      var raf;
+      var running = false;
+
+      var ball = {
+        x: 100,
+        y: 100,
+        vx: 5,
+        vy: 1,
+        radius: 25,
+        color: "tan",
+        draw: function () {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+          ctx.closePath();
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        },
+      };
+
+      function clear() {
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function draw() {
+        clear();
+        ball.draw();
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+
+        if (ball.y + ball.vy > canvas.height || ball.y + ball.vy < 0) {
+          ball.vy = -ball.vy;
+        }
+        if (ball.x + ball.vx > canvas.width || ball.x + ball.vx < 0) {
+          ball.vx = -ball.vx;
+        }
+
+        raf = window.requestAnimationFrame(draw);
+      }
+
+      canvas.addEventListener("mousemove", function (e) {
+        if (!running) {
+          clear();
+          ball.x = e.offsetX;
+          ball.y = e.offsetY;
+          ball.draw();
+        }
+      });
+
+      canvas.addEventListener("click", function (e) {
+        if (!running) {
+          raf = window.requestAnimationFrame(draw);
+          running = true;
+        }
+      });
+
+      canvas.addEventListener("mouseout", function (e) {
+        window.cancelAnimationFrame(raf);
+        running = false;
+      });
+
+      ball.draw();
+    },
+  },
 };
 </script>
 
@@ -243,7 +409,7 @@ input[type="range"]::-moz-range-thumb {
 
 .canvasWrapper {
   width: 1200px;
-  height: 800px;
+  height: 900px;
   box-sizing: border-box;
   border: 1px solid #cccccc;
   margin: 0 auto;
