@@ -49,7 +49,7 @@
           id="thinningLevel"
           autocomplete="false"
           min="3"
-          max="8"
+          max="9"
           step="1"
           placeholder="请选择抽稀程度"
         />
@@ -956,6 +956,9 @@ export default {
         case 8:
           this.dMax = 536000;
           break;
+        case 9:
+          this.dMax = 640000;
+          break;
         default:
           this.dMax = 63000;
       }
@@ -963,6 +966,7 @@ export default {
       // Douglas-Peuker-Algorithm
       /*
       两种抽稀算法抽稀程度挂钩：
+      等差： 9   道格拉斯： 640000
       等差： 8   道格拉斯： 536000
       等差： 7   道格拉斯： 430000
       等差： 6   道格拉斯： 310000
@@ -1039,7 +1043,7 @@ export default {
 
     console.log('oooooooooo',this.canvasObj)
     // 删除选中区域
-    document.getElementById("deleteSelect").onclick =  (e) => {
+    document.getElementById("deleteSelect").onclick =  () => {
       // 优化逻辑
       // if (this.canvasObj.getActiveObjects()) {
       //   console.log(this.canvasObj.getActiveObjects())
@@ -1056,12 +1060,12 @@ export default {
 
       // 可以运行的逻辑
       if (this.canvasObj && this.canvasObj.getActiveObject()) {
-        debugger
-        console.log('a')
+        // debugger
+        // console.log('a')
         var flag = this.canvasObj.getActiveObject()._objects;
-        console.log('flag',flag)
+        // console.log('flag',flag)
         if (flag) {
-          this.canvasObj.getActiveObject().forEachObject(function (o) {
+          this.canvasObj.getActiveObject().forEachObject(function () {
             this.canvasObj.remove(this.canvasObj.getActiveObject());
           });
         } else {

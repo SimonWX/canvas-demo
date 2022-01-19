@@ -1,11 +1,13 @@
 import home from "./components/CanvasDemo.vue"
-import demo from "./components/basicDemo.vue"
+import basic from "./components/basicDemo.vue"
 export default[
     {
-        path:"/", component:home
+        path:"/demo", 
+        component: home
     },
     {
-        path:"/basicdemo", component:demo
+        path:"/", 
+        component: basic
     },
     
 ]

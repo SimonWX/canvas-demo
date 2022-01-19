@@ -1,8 +1,8 @@
 /*
  * @Author: xuhao 
  * @Date: 2019-12-30 15:01:14 
- * @Last Modified by: xuhao
- * @Last Modified time: 2021-03-19 11:43:29
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2021-12-15 10:38:32
  */
 
 /*
@@ -62,8 +62,12 @@ const apDiluting = (arr, tolerance = 3) => {
 /*** 道格拉斯-抽稀算法 Douglas-Peuker-Algorithm ***/
 // 计算两点之间的距离
 const calculationDistance = (point1, point2) => {
-  // longitude，经度，即x轴上的值
-  // latitude，纬度，即y轴上的值
+  /**
+   * longitude，经度，即x轴上的值
+   * latitude，纬度，即y轴上的值
+   * 矢量计算中都是以弧度作为计量单位【计算机数学中均为矢量计算】
+   * 弧度 = 角度 * Math.PI / 180
+   */
   let lat1 = point1[point1.length - 1];
   let lat2 = point2[point2.length - 1];
   let lng1 = point1[1];

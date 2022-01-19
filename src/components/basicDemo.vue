@@ -300,14 +300,14 @@ export default {
         }
       });
 
-      canvas.addEventListener("click", function (e) {
+      canvas.addEventListener("click", function () {
         if (!running) {
           raf = window.requestAnimationFrame(draw);
           running = true;
         }
       });
 
-      canvas.addEventListener("mouseout", function (e) {
+      canvas.addEventListener("mouseout", function () {
         window.cancelAnimationFrame(raf);
         running = false;
       });
